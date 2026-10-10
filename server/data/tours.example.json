@@ -1,0 +1,63 @@
+[
+  {
+    "slug": "santorini-romance-7",
+    "country": "Greece",
+    "city": "Santorini",
+    "region": "Europe",
+    "title": "Caldera sunsets and white-washed alleys",
+    "shortDescription": "7 nights in a cliffside villa with private pool overlooking the Aegean.",
+    "description": "Santorini is a place that doesn't really photograph as well as it deserves. The whitewashed houses cascading down the volcanic caldera, the impossibly blue domes, the sound of donkeys clip-clopping past windmills at sunset — you have to be there.\n\nWe put you in a small boutique hotel in Oia, walking distance to the sunset point but tucked far enough away from the cruise-ship crowds. Mornings on your private terrace, afternoons on the black-sand beaches of Perissa, evenings tasting Assyrtiko in family wineries that have been pressing grapes here since before electricity arrived.\n\nThe tour includes a sunset catamaran around the caldera, a private guided tour of ancient Akrotiri, and a hands-on cooking class with a local grandmother in her own kitchen.",
+    "highlights": [
+      "Cliffside villa with private plunge pool",
+      "Sunset catamaran around the volcanic caldera",
+      "Wine tasting in three family wineries",
+      "Cooking class with a Santorinian grandmother",
+      "Private guide to Akrotiri archaeological site"
+    ],
+    "included": [
+      "Round-trip flights (Kyiv/Warsaw → Santorini)",
+      "Airport transfers in private car",
+      "7 nights in 5★ boutique hotel, Oia",
+      "Daily breakfast on the terrace",
+      "Sunset catamaran cruise (4h, dinner & drinks)",
+      "Wine tour with sommelier (3 wineries)",
+      "Cooking class with local family",
+      "24/7 concierge via WhatsApp"
+    ],
+    "excluded": [
+      "Travel insurance (optional add-on)",
+      "Lunches and dinners outside the included activities",
+      "Personal expenses and souvenirs",
+      "Tips for guides and drivers"
+    ],
+    "program": [
+      { "day": 1, "title": "Arrival in paradise",          "text": "Land in Santorini, private transfer to Oia. Welcome cocktails on the hotel terrace. Slow first dinner watching the sun melt into the caldera." },
+      { "day": 2, "title": "Old town walking tour",        "text": "Morning guided walk through Oia's blue-domed alleys. Afternoon free to explore. Sunset point booking included to skip the crowds." },
+      { "day": 3, "title": "Catamaran around the caldera", "text": "Full-day private catamaran cruise. Swim stops at the hot springs and the red beach. Sunset BBQ on deck." },
+      { "day": 4, "title": "Beach day at Perissa",         "text": "Drive to the black-sand beaches on the volcano side. Sunbeds, lunch, and a long siesta. Optional water sports." },
+      { "day": 5, "title": "Wine and Assyrtiko",           "text": "Visit three family wineries with a sommelier. Lunch at Santo Wines overlooking the caldera." },
+      { "day": 6, "title": "Ancient Akrotiri + cooking class", "text": "Morning at the perfectly preserved Bronze Age city. Evening cooking class in a local home — make moussaka, tzatziki, and baklava from scratch." },
+      { "day": 7, "title": "Farewell brunch and departure", "text": "Long lazy brunch. Pack up. Private transfer back to the airport." }
+    ],
+    "themes": ["water", "romantic", "food"],
+    "durationNights": 7,
+    "hotelStars": 5,
+    "meal": "Breakfast",
+    "price": 1840,
+    "oldPrice": 2190,
+    "rating": 4.9,
+    "reviews": 312,
+    "badge": "ai",
+    "emoji": "🏛️",
+    "gradient": "linear-gradient(135deg, #BFD9FF 0%, #5B8FF9 100%)",
+    "imageCount": 4,
+    "popularity": 92,
+    "_imagePrompts": {
+      "hero":      "Wide cinematic photo of Santorini Oia at golden hour — white cubic houses cascading down a volcanic cliff, blue church domes, calm Aegean sea below, soft warm light, no people, ultra detailed, 16:9 aspect, travel-magazine style.",
+      "gallery-1": "Close-up of a private hotel plunge pool on a Santorini terrace at sunset, white stucco, blue dome of a chapel in the background, two empty wine glasses on the ledge, warm cinematic lighting, no people.",
+      "gallery-2": "Narrow whitewashed alley in Oia with bougainvillea spilling over the walls, blue painted doors, soft late-afternoon sun, no people.",
+      "gallery-3": "Catamaran from above on the deep blue caldera water near Santorini, late afternoon golden light, drone perspective, no logos visible.",
+      "gallery-4": "Greek mezze spread on a wooden table — moussaka, tzatziki, olives, feta, fresh bread, glass of white wine — overhead shot, natural light, magazine-quality food photography."
+    }
+  }
+]

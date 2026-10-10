@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <title>SvitGo — підбір шрифту для заголовків</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!--
+    Google Fonts — 20 шрифтів з підтримкою кирилиці, які підходять під
+    "marker / display / handwritten" вайб (як Snugle для латиниці).
+    Якщо у фонта немає кирилиці на Google — браузер відрендерить через
+    fallback (system serif/sans), і ти одразу побачиш що шрифт не підходить.
+  -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Lobster&family=Pacifico&family=Caveat:wght@400..700&family=Marck+Script&family=Yeseva+One&family=Russo+One&family=Pangolin&family=Pridi:wght@600;700&family=Marmelad&family=Comforter&family=Berkshire+Swash&family=Tilt+Warp&family=Sansita+Swashed:wght@600;700;800&family=Shrikhand&family=Krona+One&family=Amatic+SC:wght@700&family=Neucha&family=Philosopher:wght@700&family=Forum&family=Tenor+Sans&family=Inter:wght@400;500;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/src/index.css" />
+
+  <style>
+    /* Snugle — твій латинський, для порівняння-еталона */
+    @font-face {
+      font-family: "Snugle";
+      src: url("/fonts/Snugle-Regular.ttf") format("truetype");
+      font-weight: 400;
+      font-display: swap;
+    }
+
+    :root {
+      --bg: #fbf6ee;
+      --ink: #1a1f2e;
+      --muted: #5c667a;
+      --accent: #5b8ff9;
+      --orange: #ff8a4c;
+      --card-bg: rgba(255,255,255,0.7);
+      --card-border: rgba(91,143,249,0.18);
+    }
+    [data-theme="dark"] {
+      --bg: #11141d;
+      --ink: #f1f3f8;
+      --muted: #aeb6c8;
+      --card-bg: rgba(255,255,255,0.06);
+      --card-border: rgba(191,217,255,0.14);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 32px 24px 80px;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Inter", system-ui, sans-serif;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: baseline;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto 32px;
+    }
+    .topbar h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 800;
+    }
+    .topbar p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      max-width: 600px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .controls button {
+      cursor: pointer;
+      border: 1px solid var(--card-border);
+      background: var(--card-bg);
+      color: var(--ink);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+    }
+    .controls button.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 880px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 24px 28px;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .card .label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card .label .num {
+      background: var(--ink);
+      color: var(--bg);
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+    .card .label .name {
+      font-size: 14px;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--ink);
+      font-weight: 700;
+    }
+    .card .sample {
+      margin-top: 14px;
+      font-size: 52px;
+      line-height: 1.05;
+      font-weight: 400;
+    }
+    .card .sample.small {
+      margin-top: 8px;
+      font-size: 28px;
+      opacity: 0.85;
+    }
+    .card .sample.mixed {
+      margin-top: 6px;
+      font-size: 22px;
+      opacity: 0.7;
+    }
+
+    .reference {
+      background: linear-gradient(135deg, rgba(91,143,249,0.12), rgba(255,138,76,0.12));
+      border-color: rgba(91,143,249,0.30);
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div>
+      <h1>20 шрифтів для заголовків</h1>
+      <p>
+        Кожна картка — варіант шрифту з підтримкою кирилиці. Зверху текст,
+        який реально буде на сайті ("Оберіть тему вашої подорожі!"), внизу
+        менший варіант + латиниця для перевірки сумісності.
+        <br>Скажи номер варіанта, який тобі найбільше підходить — я застосую його.
+      </p>
+    </div>
+    <div class="controls">
+      <button id="themeBtn" type="button">🌙 Темна</button>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- Reference / еталон: Snugle (твій латинський) -->
+    <div class="card reference">
+      <div class="label">
+        <span>еталон (тільки латиниця)</span>
+        <span class="name">Snugle</span>
+      </div>
+      <div class="sample" style="font-family: 'Snugle', cursive">What are we looking for?</div>
+      <div class="sample small" style="font-family: 'Snugle', cursive">Hi, Danylo</div>
+      <div class="sample mixed" style="font-family: 'Snugle', cursive">— у цього шрифту немає кирилиці —</div>
+    </div>
+
+    <!-- 1. Lobster (поточний) -->
+    <div class="card">
+      <div class="label">
+        <span class="num">1</span>
+        <span class="name">Lobster</span>
+      </div>
+      <div class="sample" style="font-family: 'Lobster', cursive">Оберіть тему вашої подорожі!</div>
+      <div class="sample small" style="font-family: 'Lobster', cursive">Що шукаємо?</div>
+      <div class="sample mixed" style="font-family: 'Lobster', cursive">Reykjavik, Київ, Львів</div>
+    </div>
+
+    <!-- 2. Pacifico -->
+    <div class="card">
+      <div class="label">
+        <span class="num">2</span>
+        <span class="name">Pacifico</span>
+      </div>
+      <div class="sample" style="font-family: 'Pacifico', cursive">Оберіть тему вашої подорожі!</div>
+      <div class="sample small" style="font-family: 'Pacifico', cursive">Що шукаємо?</div>
+      <div class="sample mixed" style="font-family: 'Pacifico', cursive">Reykjavik, Київ, Львів</div>
+    </div>
+
+    <!-- 3. Caveat 700 -->
+    <div class="card">
+      <div class="label">
+        <span class="num">3</span>
+        <span class="name">Caveat (700)</span>
+      </div>
+      <div class="sample" style="font-family: 'Caveat', cursive; font-weight: 700">Оберіть тему вашої подорожі!</div>
+      <div class="sample small" style="font-family: 'Caveat', cursive; font-weight: 700">Що шукаємо?</div>
+      <div class="sample mixed" style="font-family: 'Caveat', cursive; font-weight: 700">Reykjavik, Київ, Львів</div>
+    </div>
+
+    <!-- 4. Marck Script -->
+    <div class="card">
+      <div class="label">
+        <span class="num">4</span>
+        <span class="name">Marck Script</span>
+      </div>
+      <div class="sample" style="font-family: 'Marck Script', cursive">Оберіть тему вашої подорожі!</div>
+      <div class="sample small" style="font-family: 'Marck Script', cursive">Що шукаємо?</div>
+      <div class="sample mixed" style="font-family: 'Marck Script', cursive">Reykjavik, Київ, Львів</div>
+    </div>
+
+    <!-- 5. Yeseva One -->
+    <div class="card">
+      <div class="label">
+        <span class="num">5</span>
+        <span class="name">Yeseva One</span>
+      </div>
+      <div class="sample" style="font-family: 'Yeseva One', serif">Оберіть тему вашої подорожі!</div>
+      <div class="sample small" style="font-family: 'Yeseva One', serif">Що шукаємо?</div>
+      <div class="sample mixed" style="font-family: 'Yeseva One', serif">Reykjavik, Київ, Львів</div>
+    </div>
+
+    <!-- 6. Russo One -->
+    <div class="card">
+      <div class="label">
+        <span class="num">6</span>
+        <span class="name">Russo One</span>
+      </div>
+      <div class="sample" style="font-family: 'Russo One', sans-serif">Оберіть тему вашої подорожі!</div>
+      <div class="sample small" style="font-family: 'Russo One', sans-serif">Що шукаємо?</div>
+      <div class="sample mixed" style="font-family: 'Russo One', sans-serif">Reykjavik, Київ, Львів</div>
+    </div>
+
+    <!-- 7. Pangolin -->
+    <div class="card">
+      <div class="label">
+        <span class="num">7</span>
+        <span class="name">Pangolin</span>
+      </div>
+      <div class="sample" style="font-family: 'Pangolin', cursive">Оберіть тему вашої подорожі!</div>
+      <div class="sample small" style="font-family: 'Pangolin', cursive">Що шукаємо?</div>
+      <div class="sample mixed" style="font-family: 'Pangolin', cursive">Reykjavik, Київ, Львів</div>
+    </div>
+
+    <!-- 8. Pridi 700 -->
+    <div class="card">
+      <div class="label">
+        <span class="num">8</span>
+        <span class="name">Pridi (700)</span>
+      </div>
+      <div class="sample" style="font-family: 'Pridi', serif; font-weight: 700">Оберіть тему вашої подорожі!</div>
+      <div class="sample small" style="font-family: 'Pridi', serif; font-weight: 700">Що шукаємо?</div>
+      <div class="sample mixed" style="font-family: 'Pridi', serif; font-weight: 700">Reykjavik, Київ, Львів</div>
+    </div>
+
+    <!-- 9. Marmelad -->
+    <div class="card">
+      <div class="label">
+        <span class="num">9</span>
+        <span class="name">Marmelad</span>
+      </div>
+      <div class="sample" style="font-family: 'Marmelad', sans-serif">Оберіть тему вашої подорожі!</div>
+      <div class="sample small" style="font-family: 'Marmelad', sans-serif">Що шукаємо?</div>
+      <div class="sample mixed" style="font-family: 'Marmelad', sans-serif">Reykjavik, Київ, Львів</div>
+    </div>
+
+    <!-- 10. Comforter -->
+    <div class="card">
+      <div class="label">
+        <span class="num">10</span>
+        <span class="name">Comforter</span>
+      </div>
+      <div class="sample" style="font-family: 'Comforter', cursive">Оберіть тему вашої подорожі!</div>
+      <div class="sample small" style="font-family: 'Comforter', cursive">Що шукаємо?</div>
+      <div class="sample mixed" style="font-family: 'Comforter', cursive">Reykjavik, Київ, Львів</div>
+    </div>
+
+    <!-- 11. Berkshire Swash -->
+    <div class="card">
+      <div class="label">
+        <span class="num">11</span>
+        <span class="name">Berkshire Swash</span>
+      </div>
+      <div class="sample" style="font-family: 'Berkshire Swash', cursive">Оберіть тему вашої подорожі!</div>
+      <div class="sample small" style="font-family: 'Berkshire Swash', cursive">Що шукаємо?</div>
+      <div class="sample mixed" style="font-family: 'Berkshire Swash', cursive">Reykjavik, Київ, Львів</div>
+    </div>
+
+    <!-- 12. Tilt Warp -->
+    <div class="card">
+      <div class="label">
+        <span class="num">12</span>
+        <span class="name">Tilt Warp</span>
+      </div>
+      <div class="sample" style="font-family: 'Tilt Warp', sans-serif">Оберіть тему вашої подорожі!</div>
+      <div class="sample small" style="font-family: 'Tilt Warp', sans-serif">Що шукаємо?</div>
+      <div class="sample mixed" style="font-family: 'Tilt Warp', sans-serif">Reykjavik, Київ, Львів</div>
+    </div>
+
+    <!-- 13. Sansita Swashed 800 -->
+    <div class="card">
+      <div class="label">
+        <span class="num">13</span>
+        <span class="name">Sansita Swashed (800)</span>
+      </div>
+      <div class="sample" style="font-family: 'Sansita Swashed', cursive; font-weight: 800">Оберіть тему вашої подорожі!</div>
+      <div class="sample small" style="font-family: 'Sansita Swashed', cursive; font-weight: 800">Що шукаємо?</div>
+      <div class="sample mixed" style="font-family: 'Sansita Swashed', cursive; font-weight: 800">Reykjavik, Київ, Львів</div>
+    </div>
+
+    <!-- 14. Shrikhand -->
+    <div class="card">
+      <div class="label">
+        <span class="num">14</span>
+        <span class="name">Shrikhand</span>
+      </div>
+      <div class="sample" style="font-family: 'Shrikhand', cursive">Оберіть тему вашої подорожі!</div>
+      <div class="sample small" style="font-family: 'Shrikhand', cursive">Що шукаємо?</div>
+      <div class="sample mixed" style="font-family: 'Shrikhand', cursive">Reykjavik, Київ, Львів</div>
+    </div>
+
+    <!-- 15. Krona One -->
+    <div class="card">
+      <div class="label">
+        <span class="num">15</span>
+        <span class="name">Krona One</span>
+      </div>
+      <div class="sample" style="font-family: 'Krona One', sans-serif">Оберіть тему вашої подорожі!</div>
+      <div class="sample small" style="font-family: 'Krona One', sans-serif">Що шукаємо?</div>
+      <div class="sample mixed" style="font-family: 'Krona One', sans-serif">Reykjavik, Київ, Львів</div>
+    </div>
+
+    <!-- 16. Amatic SC 700 -->
+    <div class="card">
+      <div class="label">
+        <span class="num">16</span>
+        <span class="name">Amatic SC (700)</span>
+      </div>
+      <div class="sample" style="font-family: 'Amatic SC', cursive; font-weight: 700">Оберіть тему вашої подорожі!</div>
+      <div class="sample small" style="font-family: 'Amatic SC', cursive; font-weight: 700">Що шукаємо?</div>
+      <div class="sample mixed" style="font-family: 'Amatic SC', cursive; font-weight: 700">Reykjavik, Київ, Львів</div>
+    </div>
+
+    <!-- 17. Neucha -->
+    <div class="card">
+      <div class="label">
+        <span class="num">17</span>
+        <span class="name">Neucha</span>
+      </div>
+      <div class="sample" style="font-family: 'Neucha', cursive">Оберіть тему вашої подорожі!</div>
+      <div class="sample small" style="font-family: 'Neucha', cursive">Що шукаємо?</div>
+      <div class="sample mixed" style="font-family: 'Neucha', cursive">Reykjavik, Київ, Львів</div>
+    </div>
+
+    <!-- 18. Philosopher 700 -->
+    <div class="card">
+      <div class="label">
+        <span class="num">18</span>
+        <span class="name">Philosopher (700)</span>
+      </div>
+      <div class="sample" style="font-family: 'Philosopher', sans-serif; font-weight: 700">Оберіть тему вашої подорожі!</div>
+      <div class="sample small" style="font-family: 'Philosopher', sans-serif; font-weight: 700">Що шукаємо?</div>
+      <div class="sample mixed" style="font-family: 'Philosopher', sans-serif; font-weight: 700">Reykjavik, Київ, Львів</div>
+    </div>
+
+    <!-- 19. Forum -->
+    <div class="card">
+      <div class="label">
+        <span class="num">19</span>
+        <span class="name">Forum</span>
+      </div>
+      <div class="sample" style="font-family: 'Forum', serif">Оберіть тему вашої подорожі!</div>
+      <div class="sample small" style="font-family: 'Forum', serif">Що шукаємо?</div>
+      <div class="sample mixed" style="font-family: 'Forum', serif">Reykjavik, Київ, Львів</div>
+    </div>
+
+    <!-- 20. Tenor Sans -->
+    <div class="card">
+      <div class="label">
+        <span class="num">20</span>
+        <span class="name">Tenor Sans</span>
+      </div>
+      <div class="sample" style="font-family: 'Tenor Sans', sans-serif">Оберіть тему вашої подорожі!</div>
+      <div class="sample small" style="font-family: 'Tenor Sans', sans-serif">Що шукаємо?</div>
+      <div class="sample mixed" style="font-family: 'Tenor Sans', sans-serif">Reykjavik, Київ, Львів</div>
+    </div>
+
+  </div>
+
+  <script>
+    // Theme toggle — for порівняти, як шрифт виглядає на світлому й темному
+    const btn = document.getElementById('themeBtn');
+    function applyTheme(t) {
+      document.documentElement.setAttribute('data-theme', t);
+      btn.textContent = t === 'dark' ? '☀️ Світла' : '🌙 Темна';
+      localStorage.setItem('svitgo.fonts.theme', t);
+    }
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      applyTheme(cur);
+    });
+    applyTheme(localStorage.getItem('svitgo.fonts.theme') || 'light');
+  </script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+node_modules/
+dist/
+build/
+.vite/
+.cache/
+
+# secrets and local data
+.env
+.env.*
+!.env.example
+*.db
+*.db-journal
+*.sqlite*
+
+# misc
+*.log
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

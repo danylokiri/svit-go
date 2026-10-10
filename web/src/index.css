@@ -1,0 +1,1006 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Snugle Regular — заголовкова "хендмейд" типографіка. Латиниця тільки.
+   Файл живе в web/public/fonts/Snugle-Regular.ttf (DEMO version,
+   personal use license — OK для дипломки). */
+@font-face {
+  font-family: "Snugle";
+  src: local("Snugle"),
+       local("Snugle Regular"),
+       url("/fonts/Snugle-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  /* Restrict to Latin glyphs — for Cyrillic the cascade falls through to
+     the Caveat 700 override below (Snugle has no Cyrillic anyway). */
+  unicode-range: U+0020-007F, U+00A0-00FF, U+0100-024F, U+1E00-1EFF;
+}
+
+/* Кириличний marker-фонт. Snugle і Caveat Brush — латиниця тільки.
+   Для української обрано Sansita Swashed (800) — варіант #13 з шортлисту.
+   - bold rounded display із декоративними хвостиками та свошами,
+     ближче до hand-lettered естетики Snugle ніж класичний cursive;
+   - повний кириличний subset у Google Fonts;
+   - вага 800 дає тверду chunky подачу без розмазування на дрібних кеглях;
+   - fallback chain: Pacifico → Marck Script → Caveat, якщо основний шрифт
+     не встиг завантажитися (cold-cache захист). */
+[lang="uk"] .font-marker {
+  font-family: "Sansita Swashed", "Pacifico", "Marck Script", "Caveat", cursive;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.05;
+}
+
+/* ===========================================================================
+ * Theme variables — light (default) + dark.
+ *
+ * Strategy: instead of inlining colors everywhere, the .glass / .liquid-bg /
+ * body styles below read from these vars. Dark theme just re-defines them.
+ * Tailwind utilities like `bg-cream` still resolve to their static palette,
+ * but at the SURFACE level (body, glass, blobs) we go through vars — which
+ * is what matters visually.
+ * =========================================================================== */
+:root {
+  /* Page surface */
+  --surface-base: #fbf6ee;
+  --surface-2: #f5efe3;
+
+  /* Glass card */
+  --glass-bg: rgba(255, 255, 255, 0.68);
+  --glass-bg-strong: rgba(255, 255, 255, 0.82);
+  --popover-bg: #f6efe1;
+  --popover-border: rgba(0, 0, 0, 0.08);
+  --glass-border: rgba(91, 143, 249, 0.14);
+  --glass-border-strong: rgba(91, 143, 249, 0.18);
+  --glass-inset: rgba(255, 255, 255, 0.75);
+  --glass-inset-strong: rgba(255, 255, 255, 0.85);
+  --glass-shadow: rgba(30, 60, 120, 0.10);
+  --glass-shadow-strong: rgba(30, 60, 120, 0.14);
+
+  /* Liquid background blobs */
+  --blob-a: #bfd9ff;
+  --blob-b: #ffd0b0;
+
+  /* Text */
+  --ink-primary: #1a1f2e;
+  --ink-secondary: #5c667a;
+  --ink-muted: #8a93a8;
+}
+
+[data-theme="dark"] {
+  /* Tell the browser the page is dark — this fixes default styling of
+     native form controls (<select> options dropdown, scrollbars, date
+     pickers) which otherwise render as light/dark-text and become
+     unreadable on a dark page background. */
+  color-scheme: dark;
+
+  --surface-base: #11141d;
+  --surface-2: #181c28;
+
+  /* Glass surface in dark mode. Floating panels (header dropdowns, the
+     date popover) need a near-opaque background because they sit on top
+     of content — letting that content bleed through made small labels
+     unreadable. Inline cards stay subtler. */
+  --glass-bg: rgba(255, 255, 255, 0.07);
+  --glass-bg-strong: rgba(36, 41, 58, 0.92);
+  --glass-border: rgba(191, 217, 255, 0.14);
+  --glass-border-strong: rgba(191, 217, 255, 0.22);
+  --glass-inset: rgba(255, 255, 255, 0.08);
+  --glass-inset-strong: rgba(255, 255, 255, 0.14);
+  --glass-shadow: rgba(0, 0, 0, 0.40);
+  --glass-shadow-strong: rgba(0, 0, 0, 0.55);
+  /* Solid surface used inside floating popovers when extra opacity is
+     required (date popover, payment modal). */
+  --popover-bg: #1c2030;
+  --popover-border: rgba(255, 255, 255, 0.10);
+
+  /* Liquid blobs — keep them deep and cool. Warm/orange blob in dark mode
+     clashed badly with the dark page (especially over the world map),
+     so swap to deep navy + dark plum — no sunset hue. */
+  --blob-a: #1a2440;
+  --blob-b: #2a2540;
+
+  --ink-primary: #f1f3f8;
+  --ink-secondary: #aeb6c8;
+  --ink-muted: #707a92;
+}
+
+/* Blobs are also dimmer in dark mode — the ambient light is lower, full
+   opacity becomes visible "spots" rather than soft glow. */
+[data-theme="dark"] .liquid-bg::before,
+[data-theme="dark"] .liquid-bg::after {
+  opacity: 0.35;
+}
+[data-theme="dark"] .liquid-bg > .blob-a,
+[data-theme="dark"] .liquid-bg > .blob-b {
+  opacity: 0.25;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    background-color: var(--surface-base);
+    color: var(--ink-primary);
+    @apply font-sans antialiased;
+    font-feature-settings: "cv11", "ss01", "ss03";
+  }
+
+  ::selection {
+    background: rgba(91, 143, 249, 0.25);
+  }
+
+  /* Dark-theme overrides for Tailwind text utilities. We can't make the
+     palette colors themselves dynamic without rewriting tailwind.config,
+     so we override the resolved color via cascade. */
+  [data-theme="dark"] .text-ink-primary { color: var(--ink-primary); }
+  [data-theme="dark"] .text-ink-secondary { color: var(--ink-secondary); }
+  [data-theme="dark"] .text-ink-muted { color: var(--ink-muted); }
+  /* Cream surface overrides — used by Footer, ChatSidebar, etc. */
+  [data-theme="dark"] .bg-cream { background-color: var(--surface-base); }
+  [data-theme="dark"] .bg-cream\/70 { background-color: color-mix(in srgb, var(--surface-base) 70%, transparent); }
+  [data-theme="dark"] .bg-cream\/90 { background-color: color-mix(in srgb, var(--surface-base) 90%, transparent); }
+  [data-theme="dark"] .hover\:bg-cream:hover { background-color: var(--surface-2); }
+  [data-theme="dark"] .from-cream { --tw-gradient-from: var(--surface-base) var(--tw-gradient-from-position); }
+  [data-theme="dark"] .via-cream\/95 { --tw-gradient-via: color-mix(in srgb, var(--surface-base) 95%, transparent) var(--tw-gradient-via-position); }
+
+  /* Translucent white surfaces (chips, list rows, ghost buttons) read as
+     milky-white over the dark background, hiding the light text on top.
+     Re-route them to subtle white-on-dark frosted tints. */
+  [data-theme="dark"] .bg-white { background-color: rgba(255,255,255,0.10); }
+  [data-theme="dark"] .bg-white\/30 { background-color: rgba(255,255,255,0.04); }
+  [data-theme="dark"] .bg-white\/40 { background-color: rgba(255,255,255,0.05); }
+  [data-theme="dark"] .bg-white\/50 { background-color: rgba(255,255,255,0.06); }
+  [data-theme="dark"] .bg-white\/55 { background-color: rgba(255,255,255,0.07); }
+  [data-theme="dark"] .bg-white\/60 { background-color: rgba(255,255,255,0.08); }
+  [data-theme="dark"] .bg-white\/70 { background-color: rgba(255,255,255,0.09); }
+  [data-theme="dark"] .bg-white\/80 { background-color: rgba(255,255,255,0.10); }
+  [data-theme="dark"] .bg-white\/85 { background-color: rgba(255,255,255,0.11); }
+
+  /* Header dropdown value-chips (the "EN" / "EUR" pill next to language
+     and currency rows). The base style is `bg-white/70` which the global
+     mapping above turns into a near-invisible 9% tint. On the dark glass
+     panel that becomes white-on-glass-on-dark — barely readable.
+     Override for these specific chips: solid-ish blue tint with deep blue
+     text, same colour family as the header. */
+  [data-theme="dark"] .glass-strong .rounded-pill.bg-white\/70,
+  [data-theme="dark"] .glass-strong .rounded-pill.bg-white\/60 {
+    background-color: rgba(91, 143, 249, 0.28);
+    color: #cfddff;
+  }
+
+  /* Sub-menu choice rows (the "English ✓" / "EUR ✓" buttons inside the
+     expanded submenu). Hover states use bg-white/50 → 6% tint in dark.
+     Bump to a visible level so hovers feel like hovers. */
+  [data-theme="dark"] .glass-strong button.bg-white\/70,
+  [data-theme="dark"] .glass-strong button.hover\:bg-white\/50:hover {
+    background-color: rgba(255, 255, 255, 0.14);
+  }
+  [data-theme="dark"] .bg-white\/90 { background-color: rgba(255,255,255,0.12); }
+  /* hover:bg-white/X — same recipe, slightly brighter so hover still reads */
+  [data-theme="dark"] .hover\:bg-white\/60:hover { background-color: rgba(255,255,255,0.14); }
+  [data-theme="dark"] .hover\:bg-white\/70:hover { background-color: rgba(255,255,255,0.15); }
+  [data-theme="dark"] .hover\:bg-white\/80:hover { background-color: rgba(255,255,255,0.16); }
+  [data-theme="dark"] .hover\:bg-white\/85:hover { background-color: rgba(255,255,255,0.17); }
+  [data-theme="dark"] .hover\:bg-white\/90:hover { background-color: rgba(255,255,255,0.18); }
+  [data-theme="dark"] .hover\:bg-white:hover    { background-color: rgba(255,255,255,0.20); }
+
+  /* Inputs with `bg-white/60 focus:bg-white/80` need a hint of contrast
+     against the page so the user can find the field. */
+  [data-theme="dark"] .focus\:bg-white\/80:focus { background-color: rgba(255,255,255,0.16); }
+
+  /* Card variants used by glass-strong-on-light readability cards. */
+  [data-theme="dark"] .bg-orange-soft\/60 { background-color: rgba(255,138,76,0.18); }
+  [data-theme="dark"] .bg-orange-soft\/70 { background-color: rgba(255,138,76,0.22); }
+
+  /* Border overrides — light theme borders use white/X which becomes
+     barely visible on dark; bump them to a soft cool-toned line. */
+  [data-theme="dark"] .border-white\/40 { border-color: rgba(255,255,255,0.10); }
+  [data-theme="dark"] .border-white\/50 { border-color: rgba(255,255,255,0.12); }
+  [data-theme="dark"] .border-white\/60 { border-color: rgba(255,255,255,0.14); }
+  [data-theme="dark"] .border-white\/70 { border-color: rgba(255,255,255,0.16); }
+
+  /* Divider lines used inside the user dropdown / glass cards. */
+  [data-theme="dark"] .bg-white\/50.h-px { background-color: rgba(255,255,255,0.12); }
+}
+
+/* Surface-aware bottom shield gradient — replaces `bg-gradient-to-t
+   from-cream via-cream/95 to-transparent`, whose tailwind-generated
+   --tw-gradient-stops bakes in cream literal colours that can't be
+   overridden by simple var swaps. */
+.shield-bottom-fade {
+  background: linear-gradient(
+    to top,
+    var(--surface-base) 0%,
+    color-mix(in srgb, var(--surface-base) 95%, transparent) 50%,
+    transparent 100%
+  );
+}
+
+/* Native <select> dropdown options — explicit colour so browsers that
+   don't honour color-scheme (older Safari, some Linux Chromium) still
+   render readable text in dark mode. */
+[data-theme="dark"] option {
+  background-color: var(--surface-2);
+  color: var(--ink-primary);
+}
+
+/* ---------------------------------------------------------------------
+   .tinted-bg — universal dim layer for ANY element using an inline
+   pastel gradient (theme tiles, tour-card placeholders, sidebar avatars,
+   booking row thumbnails, chat tour bar emoji squares, etc).
+
+   - Light theme: no effect. Pastel reads naturally on the cream page.
+   - Dark theme: an inset overlay coloured `--surface-base` at ~55% alpha
+     pulls the gradient down into the dark palette so the bright sticker
+     look goes away.
+
+   How it works: `isolation: isolate` makes the element its own stacking
+   context. ::after paints at z-index 0, direct children get z-index 1 so
+   they sit above the dim. `border-radius: inherit` keeps the overlay
+   matching whatever radius the parent has (pill, glass, etc).
+   ------------------------------------------------------------------- */
+.tinted-bg {
+  position: relative;
+  isolation: isolate;
+}
+.tinted-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: transparent;
+  border-radius: inherit;
+  transition: background-color 0.2s ease;
+}
+.tinted-bg > * {
+  position: relative;
+  z-index: 1;
+}
+[data-theme="dark"] .tinted-bg::after {
+  background-color: rgba(17, 20, 29, 0.58);
+}
+/* Interactive elements (themed buttons, ThemeTile <a>, etc) get a
+   slightly lighter dim on hover — makes the tile feel responsive. */
+[data-theme="dark"] .tinted-bg.group:hover::after,
+[data-theme="dark"] button.tinted-bg:hover::after,
+[data-theme="dark"] a.tinted-bg:hover::after {
+  background-color: rgba(17, 20, 29, 0.42);
+}
+
+@layer components {
+  /* Living gradient backdrop with soft color blobs (sunset over ocean).
+     Colours are theme variables so the same component re-uses them in
+     light + dark mode without duplicating selectors. */
+  .liquid-bg {
+    position: relative;
+    background-color: var(--surface-base);
+    overflow: hidden;
+    isolation: isolate;
+    transition: background-color 0.3s ease;
+  }
+  .liquid-bg::before,
+  .liquid-bg::after,
+  .liquid-bg > .blob-a,
+  .liquid-bg > .blob-b {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    z-index: -1;
+    pointer-events: none;
+  }
+  .liquid-bg::before {
+    width: 560px;
+    height: 560px;
+    background: radial-gradient(circle, var(--blob-a) 0%, transparent 70%);
+    top: -120px;
+    left: -80px;
+    animation: liquidFloatA 22s ease-in-out infinite;
+  }
+  .liquid-bg::after {
+    width: 620px;
+    height: 620px;
+    background: radial-gradient(circle, var(--blob-b) 0%, transparent 70%);
+    top: 280px;
+    right: -120px;
+    animation: liquidFloatB 26s ease-in-out infinite;
+  }
+  .liquid-bg > .blob-a {
+    width: 480px;
+    height: 480px;
+    background: radial-gradient(circle, var(--blob-b) 0%, transparent 70%);
+    bottom: 200px;
+    left: 30%;
+    opacity: 0.55;
+    animation: liquidFloatA 28s ease-in-out infinite reverse;
+  }
+  .liquid-bg > .blob-b {
+    width: 520px;
+    height: 520px;
+    background: radial-gradient(circle, var(--blob-a) 0%, transparent 70%);
+    bottom: -100px;
+    left: -100px;
+    opacity: 0.6;
+    animation: liquidFloatB 32s ease-in-out infinite reverse;
+  }
+
+  /* The glass surface — frosted card. Colours pulled from theme vars so
+     light mode reads white-ish on cream, dark mode reads dim white on
+     near-black with the same blur recipe.
+
+     Three things make this read as "iOS Liquid Glass" rather than a flat
+     translucent rectangle:
+       1. Backdrop blur + saturate(180%) — vibrancy on whatever is behind.
+       2. Hairline 0.5px border via inset box-shadow — anti-aliases on
+          retina, gives a "etched" edge instead of a chunky 1px line.
+       3. Specular highlight via ::before — a soft top-down white gradient
+          that simulates light hitting the curved upper edge of the glass.
+          isolation:isolate + ::before z-index: 0 keep it under content.
+  */
+  .glass {
+    position: relative;
+    isolation: isolate;
+    background: var(--glass-bg);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    box-shadow:
+      inset 0 0 0 0.5px var(--glass-border),
+      0 1px 0 var(--glass-inset) inset,
+      0 10px 28px var(--glass-shadow),
+      0 1px 2px var(--glass-shadow);
+  }
+  .glass-strong {
+    position: relative;
+    isolation: isolate;
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    box-shadow:
+      inset 0 0 0 0.5px var(--glass-border-strong),
+      0 1px 0 var(--glass-inset-strong) inset,
+      0 18px 50px var(--glass-shadow-strong),
+      0 2px 4px var(--glass-shadow);
+  }
+  /* Specular highlight — a thin white gradient hugging the top edge. Same
+     recipe on both surface levels; we just bump the alpha on strong.
+     border-radius: inherit so the highlight respects whatever radius the
+     parent uses (rounded-glass / rounded-glass-md / rounded-pill). */
+  .glass::before,
+  .glass-strong::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.55) 0%,
+      rgba(255, 255, 255, 0.10) 18%,
+      transparent 40%
+    );
+    mix-blend-mode: screen;
+    opacity: 0.9;
+  }
+  .glass-strong::before {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.70) 0%,
+      rgba(255, 255, 255, 0.14) 20%,
+      transparent 45%
+    );
+  }
+  /* Content sits above the highlight. Without this, children stay below
+     ::before and the gradient masks text. */
+  .glass > *,
+  .glass-strong > * {
+    position: relative;
+    z-index: 1;
+  }
+  /* In dark mode the screen blend mode flares too bright over the muted
+     surface. Switch to plus-lighter at much lower alpha so it still reads
+     as a sheen, not a foggy white film. */
+  [data-theme="dark"] .glass::before,
+  [data-theme="dark"] .glass-strong::before {
+    mix-blend-mode: plus-lighter;
+    opacity: 0.45;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(255, 255, 255, 0.04) 25%,
+      transparent 50%
+    );
+  }
+
+  /* Floating elevation — used for modals (AddAdmin, BookingDetail,
+     ContactPopup, ConfirmDialog). Sits above page glass with extra opacity
+     so the user reads the modal as a separate layer, not "more of the
+     same translucent stuff". Same highlight, deeper shadow stack. */
+  .glass-floating {
+    position: relative;
+    isolation: isolate;
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(34px) saturate(190%);
+    -webkit-backdrop-filter: blur(34px) saturate(190%);
+    box-shadow:
+      inset 0 0 0 0.5px var(--glass-border-strong),
+      0 1px 0 var(--glass-inset-strong) inset,
+      0 32px 72px rgba(30, 60, 120, 0.22),
+      0 8px 24px rgba(30, 60, 120, 0.12),
+      0 2px 6px rgba(30, 60, 120, 0.08);
+  }
+  .glass-floating::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.80) 0%,
+      rgba(255, 255, 255, 0.18) 22%,
+      transparent 48%
+    );
+    mix-blend-mode: screen;
+    opacity: 0.95;
+  }
+  .glass-floating > * {
+    position: relative;
+    z-index: 1;
+  }
+  [data-theme="dark"] .glass-floating {
+    background: var(--popover-bg);
+    box-shadow:
+      inset 0 0 0 0.5px var(--glass-border-strong),
+      0 32px 72px rgba(0, 0, 0, 0.55),
+      0 8px 24px rgba(0, 0, 0, 0.38),
+      0 2px 6px rgba(0, 0, 0, 0.25);
+  }
+  [data-theme="dark"] .glass-floating::before {
+    mix-blend-mode: plus-lighter;
+    opacity: 0.5;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.22) 0%,
+      rgba(255, 255, 255, 0.05) 28%,
+      transparent 55%
+    );
+  }
+
+  /* Floating popover surface used by DatePopover and similar overlay menus.
+     Intentionally NEAR-OPAQUE — popovers sit on top of arbitrary content
+     and the user shouldn't be able to read the underlying page through
+     the calendar. Light mode gets a cream surface, dark mode gets a deep
+     navy near-black. Both still get backdrop-blur so the edge looks soft. */
+  .date-popover {
+    background: var(--popover-bg);
+    color: var(--ink-primary);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow:
+      0 24px 60px var(--glass-shadow-strong),
+      0 2px 6px var(--glass-shadow);
+  }
+
+  /* Pill chip on glass */
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-pill px-3 py-1 text-xs font-semibold backdrop-blur;
+  }
+  .chip-blue {
+    background: rgba(91, 143, 249, 0.18);
+    color: #2563eb;
+  }
+  .chip-orange {
+    background: rgba(255, 138, 76, 0.22);
+    color: #b34a17;
+  }
+  .chip-cream {
+    background: rgba(255, 255, 255, 0.55);
+    color: #1a1f2e;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-pill px-5 py-3 text-sm font-semibold transition-all duration-200 ease-out;
+  }
+  /* iOS-Control-Center style: subtle top-to-bottom gradient for depth +
+     a thin specular highlight on the very top edge. Flat fills feel like
+     legacy Bootstrap; the gradient is what makes the chip read as "glass
+     button" rather than "rectangle".
+     Hover uses `filter: brightness()` rather than swapping the gradient —
+     `background-image` cannot be transitioned smoothly (browsers snap
+     between values), so a hover-gradient-swap reads as a hard click.
+     A filter shift interpolates and gives the soft "lights up" feel. */
+  .btn-primary {
+    @apply text-white shadow-soft active:scale-[0.98];
+    background: linear-gradient(180deg, #6B9CFF 0%, #5B8FF9 55%, #4F84F0 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 2px 8px rgba(30, 60, 120, 0.18);
+    transition: filter 200ms ease-out, transform 200ms ease-out, box-shadow 200ms ease-out;
+  }
+  .btn-primary:hover {
+    filter: brightness(0.93);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 4px 14px rgba(30, 60, 120, 0.24);
+  }
+  .btn-accent {
+    @apply text-white shadow-soft active:scale-[0.98];
+    background: linear-gradient(180deg, #FFA070 0%, #FF8A4C 55%, #F47A3A 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.30),
+      0 2px 8px rgba(180, 80, 30, 0.18);
+    transition: filter 200ms ease-out, transform 200ms ease-out, box-shadow 200ms ease-out;
+  }
+  .btn-accent:hover {
+    filter: brightness(0.94);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.30),
+      0 4px 14px rgba(180, 80, 30, 0.24);
+  }
+  .btn-ghost {
+    @apply text-ink-primary hover:bg-white/40;
+  }
+
+  /* "Active" pill state — used by selected filter chips and any small
+     pill that needs to read as "on". Same iOS gradient recipe as
+     btn-primary but optimised for narrower chips (lighter shadow, no
+     hover filter since chips don't usually have hover). */
+  .chip-active {
+    color: #fff;
+    background: linear-gradient(180deg, #6B9CFF 0%, #5B8FF9 55%, #4F84F0 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 2px 8px rgba(30, 60, 120, 0.18);
+    border-color: transparent;
+  }
+
+  /* Floating icon button on tour-card photos (heart, compare). Glass on
+     glass — the photo behind shows through, the button is just a soft
+     translucent pill. Hover lifts opacity slightly; active state uses
+     the brand gradient + colored shadow so it pops against the image. */
+  .icon-btn-glass {
+    display: grid;
+    place-items: center;
+    height: 2.25rem;          /* h-9 */
+    width: 2.25rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--ink-primary);
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    box-shadow:
+      inset 0 0 0 0.5px rgba(255, 255, 255, 0.6),
+      0 2px 8px rgba(30, 60, 120, 0.18);
+    transition: background-color 200ms ease-out,
+                box-shadow 200ms ease-out,
+                transform 200ms ease-out;
+  }
+  .icon-btn-glass:hover {
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow:
+      inset 0 0 0 0.5px rgba(255, 255, 255, 0.7),
+      0 4px 14px rgba(30, 60, 120, 0.24);
+  }
+  .icon-btn-glass:active {
+    transform: scale(0.93);
+  }
+  .icon-btn-glass-active {
+    color: #fff;
+    background: linear-gradient(180deg, #6B9CFF 0%, #5B8FF9 55%, #4F84F0 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 4px 14px rgba(30, 60, 120, 0.28);
+  }
+  /* Heart-saved state uses orange-accent gradient to match the saved
+     emotion (red/orange = liked). Distinct from the blue compare state
+     so glanceable at a thumbnail. */
+  .icon-btn-heart-active {
+    color: #fff;
+    background: linear-gradient(180deg, #FFA070 0%, #FF8A4C 55%, #E5703A 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.30),
+      0 4px 14px rgba(180, 80, 30, 0.32);
+  }
+
+  /* Floating action cluster on tour cards — heart + compare. By default
+     these are HIDDEN on hover-capable devices (desktop with a mouse) and
+     fade in when the user hovers / focuses the card. On touch devices
+     (where there's no hover) they stay visible, otherwise mobile users
+     would never know the buttons exist.
+
+     When the tour is already saved or in compare the cluster stays
+     visible regardless — losing the active heart on unhover would feel
+     like the action got cancelled. Apply `.card-actions-pinned` to the
+     wrapper whenever any contained action is in its active state.
+
+     `:focus-within` keeps keyboard users from being stuck — tabbing into
+     the card reveals the buttons same as hovering. */
+  .card-actions {
+    transition: opacity 220ms ease-out, transform 220ms ease-out;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .card-actions:not(.card-actions-pinned) {
+      opacity: 0;
+      transform: translateY(4px);
+      pointer-events: none;
+    }
+    .group:hover .card-actions:not(.card-actions-pinned),
+    .group:focus-within .card-actions:not(.card-actions-pinned) {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+  }
+
+  /* Soft gradient pill ("Ask AI", "Ask about this tour" etc) — calmer
+     visual than .btn-primary, lives over cream. Same gradient-can't-be-
+     transitioned issue as primary, solved the same way: keep ONE base
+     gradient and overlay a heavier copy via ::before that fades from 0
+     to 1 on hover. Smoother than swapping `from-/to-` colours on hover. */
+  .btn-soft {
+    position: relative;
+    isolation: isolate;
+    background: linear-gradient(
+      to right,
+      rgba(91, 143, 249, 0.15),
+      rgba(255, 138, 76, 0.15)
+    );
+    color: var(--ink-primary);
+    transition: transform 200ms ease-out;
+  }
+  .btn-soft::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(
+      to right,
+      rgba(91, 143, 249, 0.28),
+      rgba(255, 138, 76, 0.28)
+    );
+    opacity: 0;
+    transition: opacity 220ms ease-out;
+    pointer-events: none;
+  }
+  .btn-soft:hover::before {
+    opacity: 1;
+  }
+  .btn-soft:active {
+    transform: scale(0.98);
+  }
+  /* In dark mode the orange end clashes with the cool palette. Cool both
+     stops down and bump alpha so the chip stays visible against the dim
+     surface. */
+  [data-theme="dark"] .btn-soft {
+    background: linear-gradient(
+      to right,
+      rgba(91, 143, 249, 0.22),
+      rgba(191, 217, 255, 0.14)
+    );
+  }
+  [data-theme="dark"] .btn-soft::before {
+    background: linear-gradient(
+      to right,
+      rgba(91, 143, 249, 0.38),
+      rgba(191, 217, 255, 0.22)
+    );
+  }
+
+  /* Smooth focus rings */
+  :where(button, a, input, textarea):focus-visible {
+    outline: 2px solid #5b8ff9;
+    outline-offset: 2px;
+    border-radius: 12px;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   Thin glass-aware scrollbars. Default webkit scrollbar is a chunky 16px
+   beige slab on Windows that fights the iOS-Liquid-Glass aesthetic. We
+   pull it down to 6px, give it a translucent blue thumb that brightens
+   on hover, and keep the track transparent so the page surface shows
+   through. Firefox gets the `scrollbar-width: thin` equivalent.
+   ------------------------------------------------------------------- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(91, 143, 249, 0.25) transparent;
+}
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(91, 143, 249, 0.25);
+  border-radius: 999px;
+  transition: background-color 0.2s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(91, 143, 249, 0.45);
+}
+[data-theme="dark"] * {
+  scrollbar-color: rgba(191, 217, 255, 0.20) transparent;
+}
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(191, 217, 255, 0.20);
+}
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(191, 217, 255, 0.38);
+}
+
+/* Dual-thumb range styling (catalog: budget + nights) */
+.range-thumb::-webkit-slider-thumb {
+  appearance: none;
+  pointer-events: auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #5b8ff9;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(30, 60, 120, 0.25);
+  cursor: pointer;
+  transition: transform 0.12s ease-out;
+}
+.range-thumb::-webkit-slider-thumb:hover {
+  transform: scale(1.12);
+}
+.range-thumb::-moz-range-thumb {
+  pointer-events: auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #5b8ff9;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(30, 60, 120, 0.25);
+  cursor: pointer;
+}
+.range-thumb::-webkit-slider-runnable-track {
+  background: transparent;
+  height: 1px;
+}
+
+/* Sentence-by-sentence reveal used by FadingText (AI bubbles).
+   Translation is small so it works inline without disturbing line breaks. */
+@keyframes fadeInSentence {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Generic fade-in helper. Used by modals (backdrop + dialog) and header
+   dropdowns so they don't pop in jarringly. transform-origin is set per-
+   user-site to control the focal point of the scale. */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fadeIn 180ms ease-out both;
+}
+
+/* One-shot blue glow used when a stepper indicator (Booking flow) advances
+   to the next step. Plays once on mount of whatever has `.step-glow` on
+   it — applied to the currently-active step's circle so it celebrates
+   progress without being a constant pulse. */
+@keyframes stepGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(91, 143, 249, 0.55);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(91, 143, 249, 0.18);
+  }
+  100% {
+    box-shadow: 0 0 0 14px rgba(91, 143, 249, 0);
+  }
+}
+.step-glow {
+  animation: stepGlow 720ms ease-out;
+}
+
+/* One-shot bounce played by the compare-nav counter chip when a new tour
+   is added. Re-keyed in JS so the animation re-fires on every increment
+   without needing to manually clear/re-add the class. */
+@keyframes counterBounce {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.35); }
+  65%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+.counter-bounce {
+  animation: counterBounce 380ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Search-pill focus state. Applied to the WRAPPER div (which sits around
+   the input + icon) so the whole pill lifts together rather than just
+   the input box. Uses :focus-within so any focusable descendant counts.
+   Soft blue ring + brighter background + a subtle glow underneath — iOS
+   field-focused recipe. The transition makes it ease in, not snap. */
+.search-pill {
+  transition: background-color 200ms ease-out, box-shadow 200ms ease-out;
+}
+.search-pill:focus-within {
+  background-color: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 0 0 3px rgba(91, 143, 249, 0.28),
+    0 4px 14px rgba(91, 143, 249, 0.18),
+    inset 0 0 0 0.5px rgba(91, 143, 249, 0.45);
+}
+[data-theme="dark"] .search-pill:focus-within {
+  background-color: rgba(255, 255, 255, 0.16);
+  box-shadow:
+    0 0 0 3px rgba(91, 143, 249, 0.30),
+    0 4px 14px rgba(91, 143, 249, 0.25),
+    inset 0 0 0 0.5px rgba(191, 217, 255, 0.45);
+}
+
+/* Card grid stagger entrance. Apply `stagger-grid` to the GRID container
+   and the cards inside fade up sequentially, each delayed by N*60ms based
+   on its position (--i). This is CSS-only; the parent doesn't need an
+   IntersectionObserver because it animates on mount, which is when the
+   user actually sees fresh content (route change, filter change).
+
+   Usage:
+     <div class="stagger-grid grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+       {items.map((it, i) => (
+         <TourCard key={it.id} style={{ "--i": i }} />
+       ))}
+     </div>
+
+   To keep total time bounded (a 60-card catalog shouldn't take 4 seconds
+   to fade in), the inline style should clamp the index: `--i: Math.min(i, 12)`.
+   Past row 4 of a 3-col grid everything's below the fold anyway. */
+@keyframes staggerUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.stagger-grid > * {
+  /* `--i` is set by JS / inline style; defaults to 0 if absent. */
+  animation: staggerUp 420ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 55ms);
+}
+/* Respect users who don't want motion. iOS-equivalent of the system
+   "reduce motion" setting — disables the stagger entirely. */
+@media (prefers-reduced-motion: reduce) {
+  .stagger-grid > * {
+    animation: none;
+  }
+}
+
+/* Spring overshoot for modal entries (booking detail, add admin, contact
+   popup, confirm dialog). Same curve as pop-in but a slightly larger
+   travel distance so the bounce reads on a bigger surface. Used by
+   `.animate-modal-in`. */
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-modal-in {
+  animation: modalIn 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Dropdown menus opening from the right edge of the header. Soft scale +
+   fade from the top-right anchor reads as "this comes from the button I
+   just pressed", not "this just appeared somewhere". */
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+/* Spring overshoot — the cubic curve crosses 1.0 around 70% of the
+   animation, giving a subtle "settle" bounce. Slightly longer duration
+   (260ms vs the old 180ms) so the overshoot has room to read; faster and
+   the bounce looks like a jitter rather than a spring. */
+.animate-pop-in {
+  animation: popIn 260ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  transform-origin: top right;
+}
+
+/* Toast entry — soft slide-up + fade from the bottom edge. */
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-toast-in {
+  animation: toastIn 220ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+
+/* Toast exit — mirror of toastIn, slightly faster so the screen doesn't
+   feel sluggish. The opacity drop happens at the FRONT of the curve so
+   the toast visually fades before it physically slides off. */
+@keyframes toastOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+}
+.animate-toast-out {
+  animation: toastOut 180ms cubic-bezier(0.4, 0, 0.6, 1) both;
+}
+
+/* Nested submenu opening below its parent row. Slides + fades from the
+   anchor row so the relationship "this expanded from THIS option" is
+   visually obvious. Lower distance + slightly slower than pop-in so the
+   eye tracks it rather than being startled. */
+@keyframes submenuExpand {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scaleY(0.85);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    max-height: 320px;
+  }
+}
+.animate-submenu {
+  animation: submenuExpand 200ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+  transform-origin: top;
+  overflow: hidden;
+}
+
+/* Keyframes for moving blobs (separate from Tailwind config to control opacity) */
+@keyframes liquidFloatA {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(40px, 24px) scale(1.05);
+  }
+}
+@keyframes liquidFloatB {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-40px, -28px) scale(1.08);
+  }
+}

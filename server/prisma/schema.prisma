@@ -1,0 +1,272 @@
+// SvitGo — backend database schema
+// Provider: SQLite (file ./dev.db). JSON-encoded strings for arrays (sqlite
+// has no native array type) — images, themes, highlights, program, etc.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+//  Users + auth
+// ---------------------------------------------------------------------------
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  // AI preferences (filled in /account → AI preferences)
+  budgetFrom  Int?
+  budgetTo    Int?
+  favThemes   String?  // JSON: ["water","temples"]
+  travelFreq  String?
+  companion   String?
+  citizenship String?  @default("UA")
+
+  // User-level preferences
+  preferredCurrency String? @default("EUR")   // EUR|USD|UAH|PLN|GBP|CZK|CHF|TRY
+  preferredLocale   String? @default("uk")    // uk|en|ru|pl|de
+
+  bookings    Booking[]
+  saved       SavedTour[]
+  aiQueries   AiQuery[]
+  reviews     Review[]
+  subscription Subscription?
+}
+
+// ---------------------------------------------------------------------------
+//  Tour operators (organisers) — each tour belongs to one
+//  type: "company" (registered agency) or "private" (independent guide)
+//  rating and trip count are NOT stored — computed live from real reviews
+// ---------------------------------------------------------------------------
+model Organizer {
+  id          Int      @id @default(autoincrement())
+  slug        String   @unique                  // "aegean-explorers" | "olha-marchenko"
+  name        String                            // "Aegean Explorers" | "Olha Marchenko"
+  type        String   @default("company")     // "company" | "private"
+  bio         String                            // 1-3 sentence intro
+  email       String   @unique                  // also login identity
+  phone       String
+  whatsapp    String?
+  yearsActive Int      @default(5)              // for "5 years in travel"
+
+  // Auth — organizers log in separately from end users
+  passwordHash String? // null for legacy seeded organisers without auth yet
+  avatarUrl    String?  // /organizers/{slug}/avatar.webp uploaded via cabinet
+  verified     Boolean @default(false) // platform-verified badge
+
+  createdAt   DateTime @default(now())
+
+  tours Tour[]
+}
+
+// ---------------------------------------------------------------------------
+//  Catalog — richer model, supports real photos and full tour content
+// ---------------------------------------------------------------------------
+model Tour {
+  id              Int      @id @default(autoincrement())
+  slug            String   @unique          // e.g. "santorini-7"
+
+  // Geography
+  country         String
+  city            String
+  region          String                    // "Europe" | "Asia" | "Africa" | "Americas" | "Oceania" | "Middle East"
+
+  // Copy
+  title           String                    // headline
+  shortDescription String                   // 1-line teaser for cards
+  description     String                    // full description, multi-paragraph
+  highlights      String                    // JSON ["...", "...", "..."] — 3-5 bullets
+  included        String                    // JSON: what's included in the price
+  excluded        String                    // JSON: what's NOT included
+  program         String                    // JSON array of {day,title,text}
+
+  // Trip params
+  themes          String                    // JSON array of Theme ids
+  durationNights  Int
+  hotelStars      Int
+  meal            String
+
+  // Departures — JSON array of ISO dates (YYYY-MM-DD) when the tour starts.
+  // Used by booking UI to let the user pick a date and by catalog date filter.
+  // Empty/null means "flexible / contact organiser".
+  departures      String?                   // JSON: ["2026-06-01","2026-06-15",...]
+
+  // Early-access window: tours marked exclusive are only visible to Plus/Pro
+  // subscribers until publishedAt < now()
+  publishedAt     DateTime @default(now())
+
+  // Pricing
+  price           Int
+  oldPrice        Int?
+
+  // Social proof
+  rating          Float
+  reviewsCount    Int                       // baseline seeded count, real count computed from Review[]
+  badge           String?                   // "ai" | "hot" | "new"
+
+  // Visual
+  emoji           String                    // fallback / brand icon (used in chat tour cards)
+  gradient        String                    // fallback gradient if no image yet
+  imageCount      Int      @default(0)      // number of gallery images present in /public/tours/{slug}/
+
+  // Operator
+  organizerId     Int?
+  organizer       Organizer? @relation(fields: [organizerId], references: [id], onDelete: SetNull)
+
+  // Moderation lifecycle:
+  //   - "pending"   — newly created (or returned after editing major fields),
+  //                   waiting for admin review. Hidden from public catalog.
+  //   - "active"    — approved, publicly listed (default for seeded tours).
+  //   - "disabled"  — organizer temporarily took it off the market. Hidden.
+  //   - "rejected"  — admin refused publication. Hidden, organizer sees reason.
+  // We use a String column (SQLite has no enums) and validate in Zod.
+  status           String   @default("active")
+  rejectionReason  String?
+
+  // Internal
+  popularity      Int      @default(50)
+  createdAt       DateTime @default(now())
+
+  bookings    Booking[]
+  saved       SavedTour[]
+  reviews     Review[]
+
+  // Indexes on every column that appears in WHERE / ORDER BY of the
+  // tours route. Without them Prisma does a full table scan for filters
+  // like ?country=Spain or sort=popular — fine at 100 rows, brutal at 100k.
+  @@index([country])
+  @@index([city])
+  @@index([region])
+  @@index([price])
+  @@index([popularity])
+  @@index([imageCount])
+  @@index([organizerId])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+//  Admin — separate identity for the platform-side dashboard.
+//  Same isolation as Organizer: own login route, own token kind ("adm"),
+//  own localStorage key on the client. role="super" can create other admins.
+// ---------------------------------------------------------------------------
+model Admin {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         String   @default("admin")   // "admin" | "super"
+  createdAt    DateTime @default(now())
+
+  @@index([role])
+}
+
+// ---------------------------------------------------------------------------
+//  Bookings
+// ---------------------------------------------------------------------------
+model Booking {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  tourId       Int
+
+  travelers    String
+  contact      String
+  addOns       String
+  totalPrice   Int                              // ALWAYS in EUR (base) for reporting consistency
+  currency     String   @default("EUR")         // currency user paid in (display)
+  totalInCurrency Int?                          // amount shown to user at checkout (snapshot)
+  specialRequest String?                        // free-form text from booking form
+  status       String   @default("confirmed")
+  startDate    DateTime?                       // when the trip starts; past iff < now()
+  idempotencyKey String? @unique               // client-supplied UUID; blocks double-submit
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tour Tour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  review Review?                               // one review per booking (max)
+
+  @@index([userId])
+  @@index([tourId])
+  @@index([startDate])
+}
+
+// ---------------------------------------------------------------------------
+//  Reviews — left by travelers on their completed bookings
+// ---------------------------------------------------------------------------
+model Review {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  tourId    Int
+  bookingId Int      @unique                  // one review per booking
+  rating    Int                               // 1-5
+  title     String
+  body      String
+  photos    String                            // JSON: ["/url1","/url2"]
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tour    Tour    @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([tourId])
+}
+
+// ---------------------------------------------------------------------------
+//  Saved tours
+// ---------------------------------------------------------------------------
+model SavedTour {
+  userId    Int
+  tourId    Int
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tour Tour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@id([userId, tourId])
+}
+
+// ---------------------------------------------------------------------------
+//  AI query log
+// ---------------------------------------------------------------------------
+model AiQuery {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  query     String
+  reply     String
+  tourIds   String
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])  // cleanup job deletes WHERE createdAt < cutoff
+  @@index([userId, createdAt])  // rate-limit query (count rows by user since X)
+}
+
+// ---------------------------------------------------------------------------
+//  Subscriptions — SvitGo+ paid tiers
+//  Free is implicit (no row). Plus/Pro stored as one row per user.
+//  In demo mode there's no Stripe integration — UI just toggles tier.
+//  Real-world: replace startSubscription() body with Stripe checkout session.
+// ---------------------------------------------------------------------------
+model Subscription {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  tier      String                          // "plus" | "pro"  (free = no row)
+  startedAt DateTime @default(now())
+  // Demo mode: subscription is auto-renewed indefinitely. In real flow set to
+  // the period-end returned by Stripe and refresh on webhook.
+  renewsAt  DateTime
+  // Set when user cancels; access continues until renewsAt then drops to free.
+  cancelledAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tier])
+  @@index([renewsAt])
+}
