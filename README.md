@@ -4,6 +4,16 @@ A full-stack tour booking platform with an AI travel assistant. Travellers brows
 
 **Live demo: [svit-go.vercel.app](https://svit-go.vercel.app/)**. Demo account: `danylo@example.com` / `password`. The API runs on a free plan and is kept awake from 09:00 to 24:00 Kyiv time; at night the first request may take up to a minute, and all demo data is rebuilt when the server wakes up. The AI assistant is limited to a small number of requests per day for the whole site.
 
+## Trailer
+
+<p align="center">
+  <a href="docs/trailer/svitgo-trailer.mp4">
+    <img src="docs/trailer/preview.gif" alt="SvitGo product trailer (preview, click for the full video)" width="80%">
+  </a>
+</p>
+
+A 35-second product trailer: [watch the full video](docs/trailer/svitgo-trailer.mp4) (MP4, 1080p, with sound).
+
 ## Screenshots
 
 <p align="center">
