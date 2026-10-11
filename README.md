@@ -7,26 +7,26 @@ A full-stack tour booking platform with an AI travel assistant. Travellers brows
 ## Trailer
 
 <p align="center">
-  <a href="docs/trailer/svitgo-trailer.mp4">
-    <img src="docs/trailer/preview.gif" alt="SvitGo product trailer (preview, click for the full video)" width="80%">
+  <a href="https://danylokiri.com/projects/svitgo/">
+    <img src="https://raw.githubusercontent.com/danylokiri/svit-go/assets/trailer/preview.gif" alt="SvitGo product trailer (preview, click for the full video)" width="80%">
   </a>
 </p>
 
-A 35-second product trailer: [watch the full video](docs/trailer/svitgo-trailer.mp4) (MP4, 1080p, with sound).
+A 35-second product trailer: [watch the full video](https://danylokiri.com/projects/svitgo/).
 
 ## Screenshots
 
 <p align="center">
-  <img src="docs/screenshots/home.jpg" alt="Home page with the world map and AI search" width="49%">
-  <img src="docs/screenshots/catalog.jpg" alt="Tour catalogue with filters" width="49%">
+  <img src="https://raw.githubusercontent.com/danylokiri/svit-go/assets/screenshots/home.jpg" alt="Home page with the world map and AI search" width="49%">
+  <img src="https://raw.githubusercontent.com/danylokiri/svit-go/assets/screenshots/catalog.jpg" alt="Tour catalogue with filters" width="49%">
 </p>
 <p align="center">
-  <img src="docs/screenshots/tour.jpg" alt="Tour page with departures and booking" width="49%">
-  <img src="docs/screenshots/ai-assistant.jpg" alt="AI travel assistant" width="49%">
+  <img src="https://raw.githubusercontent.com/danylokiri/svit-go/assets/screenshots/tour.jpg" alt="Tour page with departures and booking" width="49%">
+  <img src="https://raw.githubusercontent.com/danylokiri/svit-go/assets/screenshots/ai-assistant.jpg" alt="AI travel assistant" width="49%">
 </p>
 <p align="center">
-  <img src="docs/screenshots/account.jpg" alt="Account with bookings and saved tours" width="49%">
-  <img src="docs/screenshots/home-mobile.jpg" alt="Mobile layout" width="19%">
+  <img src="https://raw.githubusercontent.com/danylokiri/svit-go/assets/screenshots/account.jpg" alt="Account with bookings and saved tours" width="49%">
+  <img src="https://raw.githubusercontent.com/danylokiri/svit-go/assets/screenshots/home-mobile.jpg" alt="Mobile layout" width="19%">
 </p>
 
 ## Features
