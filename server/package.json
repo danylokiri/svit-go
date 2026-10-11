@@ -13,6 +13,7 @@
     "db:seed:json": "tsx prisma/seed-from-json.ts",
     "db:seed:reviews": "tsx prisma/seed-reviews.ts",
     "db:seed:departures": "tsx prisma/seed-departures.ts",
+    "db:seed:demo": "npm run db:seed && npm run db:seed:json -- ./data/tours.json && npm run db:seed:reviews && npm run db:seed:departures",
     "db:seed:admin": "tsx prisma/seed-admin.ts",
     "db:cleanup:imageless": "tsx prisma/delete-imageless.ts",
     "db:reset": "prisma db push --force-reset && npm run db:seed",

@@ -60,6 +60,16 @@ All configuration is done through environment variables; see [`server/.env.examp
 | `CORS_ORIGIN` | allowed web origin |
 | `OPENAI_API_KEY` | key for the AI assistant, kept on the server only and never sent to the browser |
 | `OPENAI_MODEL` | model name |
+| `AI_GLOBAL_DAILY_CAP` | optional hard ceiling of OpenAI calls per UTC day for the whole server (0 = off); recommended for public demos |
+
+## Free demo deployment
+
+The repository includes a [`render.yaml`](render.yaml) for the API on Render's free plan and a Vite app in `web` for Vercel or any static host.
+
+1. **API (Render):** create a Blueprint from this repository. On every start the free instance builds a fresh SQLite database and loads the demo data (about 110 tours with photos, reviews, demo accounts), so visitor data does not persist. Set `CORS_ORIGIN` to the web URL and, optionally, `OPENAI_API_KEY`.
+2. **Web (Vercel):** import the repository with `web` as the root directory and set `VITE_API_URL` to the API URL (no trailing slash).
+
+The free API instance sleeps after 15 minutes without traffic, so the first request afterwards takes up to a minute. Use a separate OpenAI key with a small spending limit for a public demo: subscriptions are simulated, so every visitor can select the unlimited tier and `AI_GLOBAL_DAILY_CAP` is the safety net.
 
 ## Security notes
 

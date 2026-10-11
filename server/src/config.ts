@@ -36,7 +36,7 @@ function str(name: string, def: string): string {
 function resolveJwtSecret(): string {
   const raw = process.env.JWT_SECRET;
   if (process.env.NODE_ENV === "production") {
-    if (!raw || raw === "dev-secret" || raw.length < 16) {
+    if (!raw || raw === "dev-secret" || raw.startsWith("change-me") || raw.length < 16) {
       console.error("✗ JWT_SECRET missing or insecure in production. Refusing to boot.");
       console.error("  Set JWT_SECRET to a random 32+ byte string (e.g. `openssl rand -hex 32`).");
       process.exit(1);
@@ -63,6 +63,10 @@ export const config = {
   llmMaxTokens: int("LLM_MAX_TOKENS", 500),
   llmTimeoutMs: int("LLM_TIMEOUT_MS", 25_000),
   llmMaxToolIterations: int("LLM_MAX_TOOL_ITERATIONS", 5),
+  /** Process-wide ceiling on OpenAI calls per UTC day, across all users and
+   *  tiers (0 = off). A backstop for public demos: with simulated payments any
+   *  signed-in user can pick the unlimited tier. */
+  aiGlobalDailyCap: int("AI_GLOBAL_DAILY_CAP", 0),
 
   // --- Rate limits (per hour, by user) ---
   rateLimitAuthed: int("RATE_LIMIT_AUTHED", 120),

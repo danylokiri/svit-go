@@ -112,6 +112,25 @@ if (typeof setInterval !== "undefined") {
 
 const openai = config.openaiApiKey ? new OpenAI({ apiKey: config.openaiApiKey }) : null;
 
+/** Process-wide daily ceiling on OpenAI calls (see config.aiGlobalDailyCap). */
+let globalDay = "";
+let globalCount = 0;
+function takeGlobalSlot(): boolean {
+  const cap = config.aiGlobalDailyCap;
+  if (!cap) return true;
+  const day = new Date().toISOString().slice(0, 10);
+  if (day !== globalDay) {
+    globalDay = day;
+    globalCount = 0;
+  }
+  if (globalCount >= cap) {
+    console.warn(`[llm] global daily cap reached (${globalCount}/${cap})`);
+    return false;
+  }
+  globalCount++;
+  return true;
+}
+
 export const llm = {
   enabled(): boolean {
     return !!openai;
@@ -147,6 +166,8 @@ export const llm = {
         }
       }
     }
+
+    if (!takeGlobalSlot()) return null;
 
     try {
       const completion = await Promise.race([
@@ -245,6 +266,7 @@ export async function chatWithTools(opts: {
 
   try {
     for (let i = 0; i < maxIter; i++) {
+      if (!takeGlobalSlot()) return { content: null, toolsUsed };
       const completion = await Promise.race([
         openai.chat.completions.create({
           model,

@@ -1,0 +1,38 @@
+# Render Blueprint — runs the API on the free web-service plan.
+#
+# Free plan notes:
+#   - There is no persistent disk. SQLite lives in the instance's filesystem and is
+#     rebuilt from the demo data on every start (see startCommand), so anything
+#     visitors create (accounts, bookings) disappears on restart. That is fine for a demo.
+#   - The instance spins down after 15 minutes without traffic; the first request
+#     afterwards takes about 30-60 seconds (cold start + seeding).
+#   - For real data, move to Postgres (change the datasource in prisma/schema.prisma).
+
+services:
+  - type: web
+    name: svitgo-api
+    env: node
+    plan: free
+    region: frankfurt
+    rootDir: server
+    # devDependencies are required at runtime (prisma CLI, tsx for seeding).
+    buildCommand: npm install --include=dev && npx prisma generate && npm run build
+    # SEED_ALLOW_WIPE=1 is passed only here: the demo database is rebuilt from scratch on
+    # every start, so wiping is expected. Do NOT use this start command with a persistent database.
+    startCommand: npx prisma db push --skip-generate && SEED_ALLOW_WIPE=1 npm run db:seed:demo && node dist/index.js
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: file:./data/demo.db
+      - key: JWT_SECRET
+        generateValue: true          # Render generates a random secret
+      - key: CORS_ORIGIN
+        sync: false                  # set to your web URL, e.g. https://your-app.vercel.app
+      - key: OPENAI_API_KEY
+        sync: false                  # optional; leave empty to run the demo without the AI assistant
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: AI_GLOBAL_DAILY_CAP
+        value: "150"                 # hard ceiling of OpenAI calls per day for the whole demo
