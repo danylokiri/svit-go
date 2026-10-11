@@ -1,0 +1,27 @@
+# Keeps the free Render instance of the demo API awake during the day.
+# Render's free plan sleeps after 15 minutes without traffic, which makes the first
+# visit slow. This job pings the API every 5 minutes between 09:00 and 24:00
+# Kyiv time (about 15 h/day, roughly 450-470 instance hours per month, below the
+# 750 free hours). At night the instance is allowed to sleep.
+name: Keep demo API awake
+
+on:
+  schedule:
+    # GitHub cron is UTC. 06:00-22:00 UTC covers 09:00-24:00 Kyiv in both summer and
+    # winter time; the step below checks the real Kyiv hour.
+    - cron: "*/5 6-22 * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Ping the API during Kyiv daytime
+        run: |
+          hour=$(TZ=Europe/Kyiv date +%H)
+          if [ "$((10#$hour))" -ge 9 ]; then
+            curl -fsS --max-time 90 --retry 2 --retry-delay 10 https://svitgo-api.onrender.com/ || echo "ping failed"
+          else
+            echo "Kyiv hour $hour: night, letting the instance sleep"
+          fi
