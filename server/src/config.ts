@@ -51,7 +51,9 @@ export const config = {
   port: int("PORT", 3001),
   corsOrigin: str("CORS_ORIGIN", "http://localhost:5173")
     .split(",")
-    .map((s) => s.trim()),
+    // An origin never ends with "/", so a trailing slash in the env var would never match.
+    .map((s) => s.trim().replace(/\/+$/, ""))
+    .filter(Boolean),
 
   // --- Auth ---
   jwtSecret: resolveJwtSecret(),
