@@ -2,7 +2,7 @@
 
 A full-stack tour booking platform with an AI travel assistant. Travellers browse and compare tours, chat with an assistant that recommends trips, book departures and leave reviews. Tour organisers manage their own tours and bookings, and admins moderate everything.
 
-**Live demo: [svit-go.vercel.app](https://svit-go.vercel.app/)**. Demo account: `danylo@example.com` / `password`. The API runs on a free plan and is kept awake from 09:00 to 24:00 Kyiv time; at night the first request may take up to a minute, and all demo data is rebuilt when the server wakes up. The AI assistant is limited to a small number of requests per day for the whole site.
+**Live demo: [svit-go.vercel.app](https://svit-go.vercel.app/)**. Demo account: `danylo@example.com` / `password`. The API runs on a free plan: after a pause the first request can take up to a minute while the server wakes up (the site shows a notice), and the demo data is rebuilt on wake-up. The AI assistant is limited to a small number of requests per day for the whole site.
 
 ## Trailer
 
@@ -96,7 +96,7 @@ The repository includes a [`render.yaml`](render.yaml) for the API on Render's f
 1. **API (Render):** create a Blueprint from this repository. On every start the free instance builds a fresh SQLite database and loads the demo data (100 tours with photos, reviews, demo accounts), so visitor data does not persist. Set `CORS_ORIGIN` to the web URL and, optionally, `OPENAI_API_KEY`.
 2. **Web (Vercel):** import the repository with `web` as the root directory and set `VITE_API_URL` to the API URL (no trailing slash).
 
-The free API instance sleeps after 15 minutes without traffic, so the first request afterwards takes up to a minute. The workflow [`keep-awake.yml`](.github/workflows/keep-awake.yml) pings the API every 5 minutes between 09:00 and 24:00 Kyiv time (about 15 hours a day, well below Render's 750 free instance hours per month). Use a separate OpenAI key with a small spending limit for a public demo: subscriptions are simulated, so every visitor can select the unlimited tier and `AI_GLOBAL_DAILY_CAP` is the safety net.
+The free API instance sleeps after 15 minutes without traffic, so the first request afterwards takes up to a minute. The workflow [`keep-awake.yml`](.github/workflows/keep-awake.yml) tries to ping the API every 5 minutes between 09:00 and 24:00 Kyiv time (about 15 hours a day, well below Render's 750 free instance hours per month). GitHub does not guarantee scheduled runs, so an external cron service such as cron-job.org is more reliable. Use a separate OpenAI key with a small spending limit for a public demo: subscriptions are simulated, so every visitor can select the unlimited tier and `AI_GLOBAL_DAILY_CAP` is the safety net.
 
 ## Security notes
 
