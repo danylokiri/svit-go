@@ -35,4 +35,4 @@ services:
       - key: OPENAI_MODEL
         value: gpt-4o-mini
       - key: AI_GLOBAL_DAILY_CAP
-        value: "150"                 # hard ceiling of OpenAI calls per day for the whole demo
+        value: "25"                  # hard ceiling of OpenAI calls per day for the whole demo

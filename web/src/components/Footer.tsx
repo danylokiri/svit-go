@@ -25,8 +25,7 @@ export default function Footer() {
           <FooterCol
             title={t("footer.contacts")}
             links={[
-              ["mailto:danylo.kirienko@student.karazin.ua", "danylo.kirienko@student.karazin.ua"],
-              ["tel:+380953526635", "+380 95 352 66 35"],
+              ["mailto:hello@svitgo.example", "hello@svitgo.example"],
             ]}
           />
         </div>

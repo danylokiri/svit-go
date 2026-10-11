@@ -103,10 +103,10 @@ const organizers = [
   // -------- Private guides --------
   { slug: "olha-marchenko",    name: "Olha Marchenko",    type: "private",
     bio: "Independent guide. Lives in Marrakech for 6 years, originally from Kyiv. Speaks Ukrainian, English, French and Arabic. Takes small groups (up to 6) around the medinas and the Atlas mountains.",
-    email: "olha.marrakech@gmail.com", phone: "+212 6 12 34 56 78", whatsapp: "+212 6 12 34 56 78", yearsActive: 6 },
+    email: "olha.marrakech@example.com", phone: "+212 6 12 34 56 78", whatsapp: "+212 6 12 34 56 78", yearsActive: 6 },
   { slug: "mykola-hrytsenko",  name: "Mykola Hrytsenko",  type: "private",
     bio: "Mountain guide. Former Carpathian Mountain Rescue, certified UIAGM. Runs small ski and hiking trips in the Caucasus, the Alps and the Dolomites. Schedule is flexible — works with what the weather gives.",
-    email: "mykola.guide@proton.me", phone: "+380 67 123 4567", whatsapp: "+380 67 123 4567", yearsActive: 11 },
+    email: "mykola.guide@example.com", phone: "+380 67 123 4567", whatsapp: "+380 67 123 4567", yearsActive: 11 },
   { slug: "sofia-reyes",       name: "Sofia Reyes",       type: "private",
     bio: "Barcelona-based food and culture guide. Born and raised here. Speaks English, Spanish and Catalan. Shows you the markets, tapas spots and Gaudí details that locals actually like.",
     email: "sofia@bcncuisine.com", phone: "+34 600 123 456", whatsapp: "+34 600 123 456", yearsActive: 4 },
@@ -131,7 +131,7 @@ const organizers = [
   // -------- Private guides --------
   { slug: "liang-tanaka",      name: "Liang Tanaka",      type: "private",
     bio: "Kyoto-based culture and food guide. Half-Japanese half-Taiwanese, raised in Tokyo, lives in Higashiyama. Speaks English, Japanese, Mandarin. Specialises in tea ceremony, kaiseki, ryokan stays and the parts of Tokyo that aren't in the guidebooks.",
-    email: "liang.kyoto@proton.me", phone: "+81 70 1234 5678", whatsapp: "+81 70 1234 5678", yearsActive: 8 },
+    email: "liang.kyoto@example.com", phone: "+81 70 1234 5678", whatsapp: "+81 70 1234 5678", yearsActive: 8 },
 ];
 
 const slugToOrganizer: Record<string, string> = {
@@ -244,7 +244,7 @@ async function main() {
           { firstName: "Danylo", lastName: "Kiriienko", dob: "2004-05-12", passport: "FK123456" },
           { firstName: "Anna",   lastName: "Kiriienko", dob: "2003-07-20", passport: "FK654321" },
         ]),
-        contact: JSON.stringify({ email: "danylo@example.com", phone: "+380953526635" }),
+        contact: JSON.stringify({ email: "danylo@example.com", phone: "+380440000000" }),
         addOns: JSON.stringify(["insurance"]),
         totalPrice: santorini.price * 2 + 45,
         status: "confirmed",
@@ -261,7 +261,7 @@ async function main() {
         travelers: JSON.stringify([
           { firstName: "Danylo", lastName: "Kiriienko", dob: "2004-05-12", passport: "FK123456" },
         ]),
-        contact: JSON.stringify({ email: "danylo@example.com", phone: "+380953526635" }),
+        contact: JSON.stringify({ email: "danylo@example.com", phone: "+380440000000" }),
         addOns: JSON.stringify([]),
         totalPrice: antalya.price,
         status: "completed",
@@ -289,7 +289,7 @@ async function main() {
         travelers: JSON.stringify([
           { firstName: "Danylo", lastName: "Kiriienko", dob: "2004-05-12", passport: "FK123456" },
         ]),
-        contact: JSON.stringify({ email: "danylo@example.com", phone: "+380953526635" }),
+        contact: JSON.stringify({ email: "danylo@example.com", phone: "+380440000000" }),
         addOns: JSON.stringify([]),
         totalPrice: prague.price,
         status: "completed",

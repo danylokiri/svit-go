@@ -2,6 +2,21 @@
 
 A full-stack tour booking platform with an AI travel assistant. Travellers browse and compare tours, chat with an assistant that recommends trips, book departures and leave reviews. Tour organisers manage their own tours and bookings, and admins moderate everything.
 
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/home.jpg" alt="Home page with the world map and AI search" width="49%">
+  <img src="docs/screenshots/catalog.jpg" alt="Tour catalogue with filters" width="49%">
+</p>
+<p align="center">
+  <img src="docs/screenshots/tour.jpg" alt="Tour page with departures and booking" width="49%">
+  <img src="docs/screenshots/ai-assistant.jpg" alt="AI travel assistant" width="49%">
+</p>
+<p align="center">
+  <img src="docs/screenshots/account.jpg" alt="Account with bookings and saved tours" width="49%">
+  <img src="docs/screenshots/home-mobile.jpg" alt="Mobile layout" width="19%">
+</p>
+
 ## Features
 
 - **Catalogue** of tours with filters, interactive world map, popularity and ratings
@@ -66,7 +81,7 @@ All configuration is done through environment variables; see [`server/.env.examp
 
 The repository includes a [`render.yaml`](render.yaml) for the API on Render's free plan and a Vite app in `web` for Vercel or any static host.
 
-1. **API (Render):** create a Blueprint from this repository. On every start the free instance builds a fresh SQLite database and loads the demo data (about 110 tours with photos, reviews, demo accounts), so visitor data does not persist. Set `CORS_ORIGIN` to the web URL and, optionally, `OPENAI_API_KEY`.
+1. **API (Render):** create a Blueprint from this repository. On every start the free instance builds a fresh SQLite database and loads the demo data (100 tours with photos, reviews, demo accounts), so visitor data does not persist. Set `CORS_ORIGIN` to the web URL and, optionally, `OPENAI_API_KEY`.
 2. **Web (Vercel):** import the repository with `web` as the root directory and set `VITE_API_URL` to the API URL (no trailing slash).
 
 The free API instance sleeps after 15 minutes without traffic, so the first request afterwards takes up to a minute. Use a separate OpenAI key with a small spending limit for a public demo: subscriptions are simulated, so every visitor can select the unlimited tier and `AI_GLOBAL_DAILY_CAP` is the safety net.
