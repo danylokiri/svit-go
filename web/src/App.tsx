@@ -6,6 +6,7 @@ import OrganizerHeader from "./components/OrganizerHeader";
 import AdminHeader from "./components/AdminHeader";
 import Footer from "./components/Footer";
 import { useI18n } from "./lib/i18n";
+import WakeUpNotice from "./components/WakeUpNotice";
 
 // Route-level code splitting — each non-home page becomes its own JS chunk
 // that's only downloaded when the user actually navigates there. Home stays
@@ -94,6 +95,7 @@ export default function App() {
         </Suspense>
       </main>
       {!hideFooter && <Footer />}
+      <WakeUpNotice />
     </div>
   );
 }
